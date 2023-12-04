@@ -1,0 +1,11 @@
+apiVersion: v2
+name: test-cicd2
+version: 1.0.0-test
+dependencies:
+    - name: elcicd-renderer
+      version: 0.1.0
+    - name: elcicd-kubernetes
+      version: 0.1.0
+    - name: elcicd-common
+      version: 0.1.0
+type: application

@@ -1,0 +1,154 @@
+elCicdDefaults:
+  PROJECT_ID: cicd-demo
+  SDLC_ENV: prod
+  TEAM_ID: apps-team
+  image: prod-demo-image-registry.apps-crc.testing/cicd-demo-test-cicd4:1.0.0-test
+  imagePullSecret: elcicd-prod-registry-credentials
+  ingressHostDomain: .apps-crc.testing
+  objName: test-cicd4
+elCicdDefs:
+  BUILD_NUMBER: "1"
+  CGROUP: cgroup
+  CGROUP_KEY: valueFrom
+  CGROUP_VALUE:
+    configMapKeyRef:
+      key: $<CGROUP>
+      name: $<OBJ_NAME>
+  CODE_BASE: python
+  COMPONENT_NAME: test-cicd4
+  CPU_UTILIZATION: 90
+  DEPLOYMENT_BRANCH: undefined
+  EL_CICD_PROFILES: prod
+  ENV_DEF:
+  - name: $<OBJ_NAME>-$<TOPIC_NAME>
+    value: $<OBJ_NAME>-$<TOPIC>
+  - name: password
+    valueFrom:
+      secretKeyRef:
+        key: password
+        name: $<COMPONENT_NAME>-sealed-secret
+  - name: $<TOPIC_NAME>
+    valueFrom:
+      configMapKeyRef:
+        key: $<TOPIC_NAME>
+        name: $<OBJ_NAME>
+  - $<CGROUP_KEY>: $<CGROUP_VALUE>
+    name: $<CGROUP>
+  GIT_REPO_NAME: Test_CICD4
+  INSTANCE_1: instance1
+  META_INFO_POSTFIX: meta-info
+  OBJ_NAME_1: $<COMPONENT_NAME>-$<INSTANCE_1>
+  OBJ_NAME_2: $<COMPONENT_NAME>-instance2
+  OBJ_NAMES:
+  - $<OBJ_NAME_1>
+  - $<OBJ_NAME_2>
+  PROJECT_ID: cicd-demo
+  RELEASE_VERSION: 1.0.0-test
+  SDLC_ENV: prod
+  SRC_COMMIT_HASH: e300031
+  TEAM_ID: apps-team
+  TOPIC: topic
+  TOPIC_NAME: topicname
+elCicdDefs-$<OBJ_NAME_2>:
+  INSTANCE_2_PORT: 8082
+elCicdDefs-dev:
+  CPU_UTILIZATION: 150
+elCicdTemplates:
+- elCicdDefs-$<OBJ_NAME_1>-dev:
+    CGROUP_KEY: value
+    CGROUP_VALUE: patch-test-$<SDLC_ENV>-$<INSTANCE_1>
+  env: $<ENV_DEF>
+  objNames: $<OBJ_NAMES>
+  port: $<INSTANCE_2_PORT>
+  templateName: deploymentServiceIngress
+- elCicdDefs-$<OBJ_NAME_1>:
+    MAX_REPLICAS: 3
+  elCicdDefs-$<OBJ_NAME_1>-prod:
+    MAX_REPLICAS: 5
+  elCicdDefs-$<OBJ_NAME_2>:
+    MAX_REPLICAS: 7
+  maxReplicas: $<MAX_REPLICAS>
+  metrics:
+  - name: cpu
+    target:
+      averageUtilization: $<CPU_UTILIZATION>
+      type: Utilization
+    type: resource
+  minReplicas: $<MIN_REPLICAS>
+  objNames: $<OBJ_NAMES>
+  templateName: horizontalPodAutoscaler
+- data:
+    $<CGROUP>: $<CGROUP>
+    $<TEST_KEY>: $<TEST_VALUE>
+    $<TOPIC_NAME>: $<SDLC_ENV>-$<OBJ_NAME>-$<TOPIC>
+  elCicdDefs-$<OBJ_NAME_2>-dev:
+    TEST_KEY: my-test-key
+    TEST_VALUE: just-for-the-$<OBJ_NAME_2>-map
+  objNames: $<OBJ_NAMES>
+  templateName: configMap
+- env:
+  - name: POSTGRESQL_USER
+    valueFrom:
+      secretKeyRef:
+        key: database-user
+        name: postgresql
+  - name: POSTGRESQL_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        key: database-password
+        name: postgresql
+  - name: POSTGRESQL_DATABASE
+    valueFrom:
+      secretKeyRef:
+        key: database-name
+        name: postgresql
+  image: quay.io/centos7/postgresql-13-centos7
+  imagePullPolicy: IfNotPresent
+  limitsMemory: 512Mi
+  livenessProbe:
+    exec:
+      command:
+      - /usr/libexec/check-container
+      - --live
+    failureThreshold: 3
+    initialDelaySeconds: 120
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 10
+  mustHaveAnyProfile:
+  - dev
+  objName: postgresql
+  port: 5432
+  readinessProbe:
+    exec:
+      command:
+      - /usr/libexec/check-container
+    failureThreshold: 3
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+  requestsMemory: 64Mi
+  templateName: deploymentService
+  terminationMessagePath: /dev/termination-log
+  volumeMounts:
+  - mountPath: /var/lib/pgsql/data
+    name: postgresql-data
+  volumes:
+  - emptyDir: {}
+    name: postgresql-data
+elcicd-common:
+  global:
+    elCicdProfiles:
+    - prod
+elcicd-kubernetes:
+  global:
+    elCicdProfiles:
+    - prod
+elcicd-renderer:
+  global:
+    elCicdProfiles:
+    - prod
+global:
+  elCicdProfiles:
+  - prod

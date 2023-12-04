@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  labels:    
+    helm.sh/chart: elcicd-chart-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: release-name
+    elcicd.io/selector: test-cicd3
+  name: test-cicd3
+commonLabels: 
+  elcicd.io/component: test-cicd3
+  elcicd.io/projectid: cicd-demo
+  elcicd.io/teamid: apps-team
+configMapGenerator: 
+  - literals:
+    - projectid=cicd-demo
+    - component=test-cicd3
+    - profiles=prod
+    - git-repo=TeSt-CiCd3
+    - src-commit-hash=35682f2
+    - deployment-branch=undefined
+    - release-version=1.0.0-test
+    - code-base=python
+    - build-number="1"
+    - deploy-time="Mon Dec 4 06:08:35 UTC 2023"
+    name: cicd-demo-test-cicd3-meta-info
+    options:
+      disableNameSuffixHash: true
+labels: 
+  - includeTemplates: true
+    pairs:
+      elcicd.io/deploy-time: "2023_12_04_06_08_35"

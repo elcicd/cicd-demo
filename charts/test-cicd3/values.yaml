@@ -1,0 +1,74 @@
+elCicdDefaults:
+  PROJECT_ID: cicd-demo
+  SDLC_ENV: prod
+  TEAM_ID: apps-team
+  image: prod-demo-image-registry.apps-crc.testing/cicd-demo-test-cicd3:1.0.0-test
+  imagePullSecret: elcicd-prod-registry-credentials
+  ingressHostDomain: .apps-crc.testing
+  objName: test-cicd3
+elCicdDefs:
+  BUILD_NUMBER: "1"
+  CGROUP: cgroup
+  CODE_BASE: python
+  COMPONENT_NAME: test-cicd3
+  CONFIG_MAP: config-map
+  DEPLOYMENT_BRANCH: undefined
+  EL_CICD_PROFILES: prod
+  GIT_REPO_NAME: TeSt-CiCd3
+  META_INFO_POSTFIX: meta-info
+  PASSWORD: password
+  PROJECT_ID: cicd-demo
+  RELEASE_VERSION: 1.0.0-test
+  SDLC_ENV: prod
+  SRC_COMMIT_HASH: 35682f2
+  TEAM_ID: apps-team
+  TOPIC_NAME: topicname
+  VOLUME_NAME: cm-mount
+elCicdTemplates:
+- env:
+  - name: PYTHONUNBUFFERED
+    value: "1"
+  - name: $<PASSWORD>
+    valueFrom:
+      secretKeyRef:
+        key: $<PASSWORD>
+        name: $<COMPONENT_NAME>-sealed-secret
+  - name: $<CGROUP>
+    valueFrom:
+      configMapKeyRef:
+        key: $<CGROUP>
+        name: $<COMPONENT_NAME>-$<CONFIG_MAP>
+  - name: $<TOPIC_NAME>
+    valueFrom:
+      configMapKeyRef:
+        key: $<TOPIC_NAME>
+        name: $<COMPONENT_NAME>-$<CONFIG_MAP>
+  schedule: '*/3 * * * *'
+  templateName: cronjob
+  volumeMounts:
+  - mountPath: /mnt
+    name: $<VOLUME_NAME>
+  volumes:
+  - configMap:
+      name: $<COMPONENT_NAME>-$<CONFIG_MAP>
+    name: $<VOLUME_NAME>
+- data:
+    $<CGROUP>: $<SDLC_ENV>$<CGROUP>
+    $<TOPIC_NAME>: $<SDLC_ENV>topic
+  objName: $<COMPONENT_NAME>-$<CONFIG_MAP>
+  templateName: configMap
+elcicd-common:
+  global:
+    elCicdProfiles:
+    - prod
+elcicd-kubernetes:
+  global:
+    elCicdProfiles:
+    - prod
+elcicd-renderer:
+  global:
+    elCicdProfiles:
+    - prod
+global:
+  elCicdProfiles:
+  - prod

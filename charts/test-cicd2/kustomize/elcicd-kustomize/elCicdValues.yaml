@@ -1,0 +1,24 @@
+global:
+  elCicdProfiles:
+  - prod
+elCicdDefs:
+  EL_CICD_PROFILES: prod
+  TEAM_ID: apps-team
+  PROJECT_ID: cicd-demo
+  RELEASE_VERSION: 1.0.0-test
+  BUILD_NUMBER: '1'
+  SDLC_ENV: prod
+  META_INFO_POSTFIX: meta-info
+  COMPONENT_NAME: test-cicd2
+  CODE_BASE: python
+  GIT_REPO_NAME: test_CICD2
+  SRC_COMMIT_HASH: 44dec46
+  DEPLOYMENT_BRANCH: undefined
+elCicdDefaults:
+  imagePullSecret: elcicd-prod-registry-credentials
+  ingressHostDomain: .apps-crc.testing
+  SDLC_ENV: prod
+  TEAM_ID: apps-team
+  PROJECT_ID: cicd-demo
+  objName: test-cicd2
+  image: prod-demo-image-registry.apps-crc.testing/cicd-demo-test-cicd2:1.0.0-test

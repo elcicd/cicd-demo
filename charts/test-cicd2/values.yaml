@@ -1,0 +1,85 @@
+elCicdDefaults:
+  PROJECT_ID: cicd-demo
+  SDLC_ENV: prod
+  TEAM_ID: apps-team
+  image: prod-demo-image-registry.apps-crc.testing/cicd-demo-test-cicd2:1.0.0-test
+  imagePullSecret: elcicd-prod-registry-credentials
+  ingressHostDomain: .apps-crc.testing
+  objName: test-cicd2
+elCicdDefs:
+  BUILD_NUMBER: "1"
+  CGROUP: cgroup
+  CODE_BASE: python
+  COMPONENT_NAME: test-cicd2
+  CONFIGMAP: configmap
+  CPU_UTILIZATION: 90
+  DEPLOYMENT_BRANCH: undefined
+  EL_CICD_PROFILES: prod
+  GIT_REPO_NAME: test_CICD2
+  MAX_REPLICAS: 3
+  META_INFO_POSTFIX: meta-info
+  PORT: 8080
+  PROJECT_ID: cicd-demo
+  RELEASE_VERSION: 1.0.0-test
+  REPLICAS: 1
+  SDLC_ENV: prod
+  SRC_COMMIT_HASH: 44dec46
+  TEAM_ID: apps-team
+elCicdDefs-dev:
+  CPU_UTILIZATION: 50
+  PORT: 8081
+elCicdDefs-prod:
+  MAX_REPLICAS: 5
+elCicdDefs-qa:
+  MAX_REPLICAS: 4
+  REPLICAS: 3
+elCicdDefs-stg:
+  CPU_UTILIZATION: 50
+elCicdTemplates:
+- env:
+  - name: password
+    valueFrom:
+      secretKeyRef:
+        key: password
+        name: $<COMPONENT_NAME>-sealed-secret
+  - name: topicname
+    valueFrom:
+      configMapKeyRef:
+        key: topicname
+        name: $<COMPONENT_NAME>-$<CONFIGMAP>
+  - name: $<CGROUP>
+    valueFrom:
+      configMapKeyRef:
+        key: $<CGROUP>
+        name: $<COMPONENT_NAME>-$<CONFIGMAP>
+  port: $<PORT>
+  replicas: $<REPLICAS>
+  templateName: deploymentService
+- data:
+    $<CGROUP>: $<CGROUP>
+    topicname: $<SDLC_ENV>-topic
+  objName: $<COMPONENT_NAME>-$<CONFIGMAP>
+  templateName: configMap
+- maxReplicas: $<MAX_REPLICAS>
+  metrics:
+  - name: cpu
+    target:
+      averageUtilization: $<CPU_UTILIZATION>
+      type: Utilization
+    type: resource
+  templateName: horizontalPodAutoscaler
+elcicd-common:
+  global:
+    elCicdProfiles:
+    - prod
+elcicd-kubernetes:
+  global:
+    elCicdProfiles:
+    - prod
+elcicd-renderer:
+  global:
+    elCicdProfiles:
+    - prod
+global:
+  elCicdProfiles:
+  - prod

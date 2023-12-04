@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- test-sealed-secret.json
+
+configMapGenerator:
+- name: test-dev-kust-config-map
+  literals:
+  - prod-key-1=prod-value-1-A
+  - prod-key-2=prod-value-2-B

@@ -1,0 +1,14 @@
+apiVersion: v2
+name: cicd-demo
+version: 1.0.0-test
+dependencies:
+    - name: elcicd-renderer
+      repository: oci://ghcr.io/elcicd
+      version: 0.1.0
+    - name: elcicd-kubernetes
+      repository: oci://ghcr.io/elcicd
+      version: 0.1.0
+    - name: elcicd-common
+      repository: oci://ghcr.io/elcicd
+      version: 0.1.0
+type: application

@@ -1,0 +1,113 @@
+elCicdDefaults:
+  PROJECT_ID: cicd-demo
+  SDLC_ENV: prod
+  TEAM_ID: apps-team
+  image: prod-demo-image-registry.apps-crc.testing/cicd-demo-test-cicd1:1.0.0-test
+  imagePullSecret: elcicd-prod-registry-credentials
+  ingressHostDomain: .apps-crc.testing
+  objName: test-cicd1
+elCicdDefs:
+  BUILD_NUMBER: "1"
+  CM_TOPIC_NAME: $<SDLC_ENV> topic
+  CODE_BASE: python
+  COMPONENT_NAME: test-cicd1
+  DEPLOYMENT_BRANCH: undefined
+  EL_CICD_PROFILES: prod
+  ENV_DEF:
+  - $<TEST_VAR>
+  - name: password
+    valueFrom:
+      secretKeyRef:
+        key: password
+        name: $<COMPONENT_NAME>-sealed-secret
+  GIT_REPO_NAME: Test-CICD1
+  META_INFO_POSTFIX: meta-info
+  PORT: 8081
+  PROJECT_ID: cicd-demo
+  PROM_PORT: 8082
+  RELEASE_VERSION: 1.0.0-test
+  SDLC_ENV: prod
+  SRC_COMMIT_HASH: 4f74772
+  TEAM_ID: apps-team
+  TEST_VAR:
+    name: TEST_VAR
+    value: testing $<SDLC_ENV>
+  VOLUME_MNT_PATH: /mnt/nfs
+  VOLUME_MNTS:
+  - mountPath: $<VOLUME_MNT_PATH>
+    name: $<VOLUME_NAME>
+  VOLUME_NAME: pv-eng-nfs-dir-$<COMPONENT_NAME>-$<SDLC_ENV>
+  VOLUMES:
+  - name: $<VOLUME_NAME>
+    persistentVolumeClaim:
+      claimName: $<VOLUME_NAME>
+elCicdDefs-dev:
+  CM_TOPIC_NAME: dev specific $<SDLC_ENV> topic
+  DEV_SPECIFIC_KEY: $<SDLC_ENV>-specific-value
+  DEV_SPECIFIC_VAL: testing merge capability
+  PORT: 9090
+  PROM_PORT: 9091
+  VOLUME_MNT_PATH: /mnt/nfs-stub
+  VOLUME_NAME: configmap-file
+  VOLUMES:
+  - configMap:
+      defaultMode: 420
+      name: $<COMPONENT_NAME>-cm-mount
+    name: configmap-file
+elCicdDefs-east:
+  CM_TOPIC_NAME: prod-$<SDLC_ENV> topic
+elCicdDefs-prod:
+  LIMIT_MEM: 1Gi
+  PORT: 9090
+  REQUEST_MEM: 200Mi
+  VOLUME_NAME: pv-prod-nfs-dir-$<COMPONENT_NAME>-$<SDLC_ENV>
+elCicdDefs-qa:
+  LIMIT_MEM: 800Mi
+  REQUEST_CPU: 200m
+  REQUEST_MEM: 100Mi
+elCicdDefs-stg:
+  TEST_VAR: null
+elCicdDefs-west:
+  CM_TOPIC_NAME: prod-$<SDLC_ENV> topic
+elCicdTemplates:
+- env: $<ENV_DEF>
+  envFrom:
+  - configMapRef:
+      name: $<COMPONENT_NAME>-env-configmap
+  limitsMemory: $<LIMIT_MEM>
+  port: $<PORT>
+  prometheus:
+    port: $<PROM_PORT>
+  requestsMemory: $<REQUEST_MEM>
+  templateName: deploymentService
+  volumeMounts: $<VOLUME_MNTS>
+  volumes: $<VOLUMES>
+- data:
+    $<DEV_SPECIFIC_KEY>: $<DEV_SPECIFIC_KEY>
+    cgroup: cgroup
+    topicname: $<CM_TOPIC_NAME>
+  objName: $<COMPONENT_NAME>-env-configmap
+  templateName: configMap
+- anyProfiles:
+  - dev
+  data:
+    a-different-$<DEV_SPECIFIC_KEY>: a different $<DEV_SPECIFIC_KEY>
+    dev-only-cgroup: dev-cgroup
+    dev-topicname: dev-only-$<CM_TOPIC_NAME>
+  objName: $<COMPONENT_NAME>-cm-mount
+  templateName: configMap
+elcicd-common:
+  global:
+    elCicdProfiles:
+    - prod
+elcicd-kubernetes:
+  global:
+    elCicdProfiles:
+    - prod
+elcicd-renderer:
+  global:
+    elCicdProfiles:
+    - prod
+global:
+  elCicdProfiles:
+  - prod

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-qa-config-map
+data:
+  prod-key-1: prod-value-1-A
+  prod-key-2: prod-value-2-B
